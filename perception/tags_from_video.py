@@ -16,8 +16,9 @@ at_detector = Detector(
    decode_sharpening=0.25,
    debug=0
 )
-
+outfile = open("data/t_poses.txt", "w")
 cap = cv2.VideoCapture(0)
+cap.set(cv2.CAP_PROP_AUTOFOCUS, 0)
 if not cap.isOpened():
     print("Unable to open camera")
     exit()
@@ -32,9 +33,11 @@ while True:
     camera_params=[camera_matrix[0, 0], camera_matrix[1, 1], camera_matrix[0, 2], camera_matrix[1, 2]],
     tag_size = 0.1)
     for det in output:
+        t_pose = det.pose_t[:,0]
+        outfile.write(f"{t_pose[0]} {t_pose[1]} {t_pose[2]}\n")
         curr_center=det.center 
         cv2.putText(img_gray, f"{det.tag_id}", (int(curr_center[0]), int(curr_center[1])),
-            cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 4, cv2.LINE_AA)
+        cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 4, cv2.LINE_AA)
 
     cv2.imshow("frame", img_gray)
     if cv2.waitKey(1) == ord('q'):
@@ -42,3 +45,4 @@ while True:
 
 cap.release()
 cv2.destroyAllWindows()
+
