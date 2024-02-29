@@ -33,7 +33,8 @@ while True:
     tag_size = 0.1)
     for det in output:
         curr_center=det.center 
-        cv2.putText(img_gray, f"{det.tag_id}", (int(curr_center[0]), int(curr_center[1])), cv2.FONT_HERSHEY_SIMPLEX, 4, (0, 255, 0), 2, cv2.LINE_AA)
+        cv2.putText(img_gray, f"{det.tag_id}", (int(curr_center[0]), int(curr_center[1])),
+            cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 4, cv2.LINE_AA)
 
     cv2.imshow("frame", img_gray)
     if cv2.waitKey(1) == ord('q'):
