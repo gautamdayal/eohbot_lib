@@ -1,0 +1,4 @@
+matplotlib==3.4.3
+numpy==1.20.3
+opencv_python==4.7.0.68
+pupil_apriltags==1.0.4.post10
