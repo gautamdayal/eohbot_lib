@@ -1,1 +1,4 @@
 .DS_Store
+
+# don't commit data text files
+data/*
