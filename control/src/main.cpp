@@ -3,7 +3,7 @@
 // Pin assignments
 constexpr int M1_IN1 =  1; 
 constexpr int M1_IN2 =  2; 
-const int M1_ENA =  0; 
+constexpr int M1_ENA =  0; 
 
 constexpr int M2_IN1 =  3; 
 constexpr int M2_IN2 =  4; 
