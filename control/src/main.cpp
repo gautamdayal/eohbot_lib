@@ -2,7 +2,7 @@
 #include <drivetrain_hal.h>
 
 // Pin assignments
-#define MOTORS
+// #define MOTORS
 #define SERIAL
 
 MotorPins motor_1{M1_ENA, M1_IN1, M1_IN2};
@@ -34,10 +34,14 @@ void setup() {
   pinMode(M4_IN2, OUTPUT);
   pinMode(M4_ENA, OUTPUT);
 
+  pinMode(LED_BUILTIN, OUTPUT);
+
   Serial.begin(9600);
   delay(5000);
 
 }
+
+int direction=999;
 
 // the loop function runs over and over again forever
 void loop() {
@@ -53,7 +57,17 @@ void loop() {
 
   #ifdef SERIAL
 
-  
+  if (Serial.available() >= 3) {
+    char in_angle[4];
+    Serial.readBytes(in_angle, 3);
+    in_angle[3]='\0';
+    direction = atoi(in_angle);
+  }
+  if (direction == 999) {
+    stop_robot(rat);
+  } else {
+    direction_drive(direction, 200, rat);
+  }
 
   #endif SERIAL
 
