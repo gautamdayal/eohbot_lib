@@ -1,5 +1,6 @@
 import serial
 import time
+import perception
 
 teensy = serial.Serial("/dev/tty.usbmodem87906701")
 teensy.baudrate = 9600
