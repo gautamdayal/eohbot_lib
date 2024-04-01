@@ -11,6 +11,9 @@ struct MotorPins{
   int in2;
 };
 
+/*
+    @todo Turn into a class with methods rather than a struct that holds MotorPins objects
+*/
 struct Robot {
     MotorPins m1; 
     MotorPins m2;
