@@ -1,14 +1,8 @@
 import serial
-import perception
+import time
 
-# Initialize things
-
-# Main loop
-while 1:
-    # Run perception loop
-
-    # Run planner
-
-    # Go through plan and send motor commands for appropriate durations
-
-    pass
+teensy = serial.Serial("/dev/tty.usbmodem87906701")
+teensy.baudrate = 9600
+time.sleep(5)
+teensy.write(1)
+teensy.close()
