@@ -1,4 +1,5 @@
-matplotlib==3.4.3
-numpy==1.20.3
-opencv_python==4.7.0.68
+matplotlib==3.8.3
+networkx==3.2.1
+numpy==1.26.4
 pupil_apriltags==1.0.4.post10
+pyserial==3.5
