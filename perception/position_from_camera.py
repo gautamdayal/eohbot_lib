@@ -9,6 +9,27 @@ def PolyArea2D(pts):
     a = 0.5 * abs(sum(x1 * y2 - x2 * y1 for x1, y1, x2, y2 in l))
     return a
 
+def plotDynamicTag(Cesc, rvec, dtagloc, ax=None):
+    R, _ = cv2.Rodrigues(rvec)
+    
+    x_tag = [dtagloc[0], 0, 0]
+    y_tag = [0, dtagloc[1], 0]
+    z_tag = [0, 0, dtagloc[2]]
+    
+    x_esc = R.T @ x_tag + Cesc
+    y_esc = R.T @ y_tag + Cesc
+    z_esc = R.T @ z_tag + Cesc
+    
+    vec_esc = R.T @ x_tag + R.T@y_tag + R.T@z_tag + Cesc
+    # print(R.T@x_tag, R.T@y_tag, R.T@z_tag)
+    # 
+    # ax.plot3D((Cesc[0], x_esc[0]), (Cesc[1], x_esc[1]), (Cesc[2], x_esc[2]), '--r'),
+    #             ax.plot3D((Cesc[0], y_esc[0]), (Cesc[1], y_esc[1]), (Cesc[2], y_esc[2]), '--g'),
+    #             ax.plot3D((Cesc[0], z_esc[0]), (Cesc[1], z_esc[1]), (Cesc[2], z_esc[2]), '--b'),
+    point = ax.scatter3D(vec_esc[0], vec_esc[1], vec_esc[2], 'k', c='purple')
+    tag_plot = [ax.plot3D((Cesc[0], vec_esc[0]), (Cesc[1], vec_esc[1]), (Cesc[2], vec_esc[2]), '-k')]
+    
+    return point, tag_plot
 
 def plotCamera3D(Cesc, rvec, ax=None):
     if ax is None:
@@ -21,9 +42,9 @@ def plotCamera3D(Cesc, rvec, ax=None):
     p3_cam = [50, -50, 20]
     p4_cam = [-50, -50, 20]
     
-    x_cam = [300,0,0]
-    y_cam = [0,300,0]
-    z_cam = [0,0,300]
+    x_cam = [3,0,0]
+    y_cam = [0,3,0]
+    z_cam = [0,0,3]
 
     p1_esc = R.T @ p1_cam + Cesc
     p2_esc = R.T @ p2_cam + Cesc
@@ -78,7 +99,7 @@ camera = 0
 #                 np.array([[-13., -42., tagsize], [-13-tagsize, -42., tagsize], [-13-tagsize, -42., 0.], [-13., -42., 0.]])]
 
 ## Living room configuration
-dyn_ids = [32]
+dyn_ids = [29, 32]
 static_ids = [10,12,14,15,16,17,20]
 objectPoints = {
     10: np.array([[0., 0., 160.], [-tagsize, 0., 160.], [-tagsize, 0., 160 + tagsize], [0., 0., 160 + tagsize]]),
@@ -101,6 +122,7 @@ vs = cv2.VideoCapture(camera)
 detector = apriltag.Detector(families=family)
 fig = ppl.figure(figsize=ppl.figaspect(0.5))
 axes = fig.add_subplot(1,2,1,projection='3d')
+axes.set_box_aspect([1.0,1.0,1.0])
 stats = fig.add_subplot(1,2,2)
 axes.set_xlabel('X (mm)')
 axes.set_ylabel('Y (mm)')
@@ -173,16 +195,16 @@ while vs.isOpened():
             continue
         elif r.tag_id in dyn_ids:
             #x, z useful, y not useful
-            print("Dynamic Tag found", r.tag_id)
+            # print("Dynamic Tag found", r.tag_id)
             # print("Tag info",r.pose_R)
             pose = r.pose_t.reshape(3)
-            # pose[2] *= -1
+            arr_pose_t.append(pose)
             temp_arr = 1000 * np.array(arr_pose_t)
             
-            # stats.cla()
-            # stats.plot(temp_arr[:,0], c = "red")
-            # stats.plot(temp_arr[:,1], c = "green")
-            # stats.plot(temp_arr[:,2], c = "blue")
+            stats.cla()
+            stats.plot(temp_arr[:,0], c = "red")
+            stats.plot(temp_arr[:,1], c = "green")
+            stats.plot(temp_arr[:,2], c = "blue")
             
             # camera_points.append(axes.scatter3D(1000 * r.pose_t[0,0], 1000 * r.pose_t[1,0], 1000 * r.pose_t[2,0], 'k', c='purple'))
             dyn_points.append(1000 * pose)
@@ -214,16 +236,16 @@ while vs.isOpened():
             master_angle = master_angle + (angle_fusion[i].reshape(3) * ratio[i])
             
         angle = np.arctan(sin_angle / cos_angle)
-        master_angle = np.array([normalize_angle(master_angle[0]), normalize_angle(master_angle[1]), normalize_angle(master_angle[2])])
+        # master_angle = np.array([normalize_angle(master_angle[0]), normalize_angle(master_angle[1]), normalize_angle(master_angle[2])])
 
         angle[0] = angle[0] - np.pi
-        arr_angles.append(master_angle)
-        temp_arr = np.array(arr_angles)
+        # arr_angles.append(master_angle)
+        # temp_arr = np.array(arr_angles)
         
-        stats.cla()
-        stats.plot(temp_arr[:,0], c = "purple")
-        stats.plot(temp_arr[:,1], c = "orange")
-        stats.plot(temp_arr[:,2], c = "black")
+        # stats.cla()
+        # stats.plot(temp_arr[:,0], c = "purple")
+        # stats.plot(temp_arr[:,1], c = "orange")
+        # stats.plot(temp_arr[:,2], c = "black")
     
         lines, camera_point = plotCamera3D(camera, master_angle, axes)
         camera_points.append(camera_point)
@@ -232,10 +254,17 @@ while vs.isOpened():
             # camera_hoomg = np.array([*camera, 1])
             # dyn_coord = np.dot(dyn_point, camera_hoomg)
             # dyn_coord = dyn_coord[:3] / dyn_coord[3]
-            R = cv2.Rodrigues(angle)[0]
-            dyn_coord = -R.T @ dyn_point + camera
+            # R = cv2.Rodrigues(angle)[0]
+            # dyn_point *= -1
+            # dyn_point = np.array([dyn_point[1], dyn_point[0], dyn_point[2]])
+            # dyn_coord = camera - R.T @ dyn_point
+            # dyn_coord = camera + np.array([-dyn_point[2], dyn_point[0], -dyn_point[1]])
             # dyn_coord = [camera[0] + dyn_point[0], camera[1] + dyn_point[2], camera[2] + dyn_point[1]]
-            dyn_tag_points.append(axes.scatter3D(dyn_coord[0], dyn_coord[1], dyn_coord[2], 'k', c='purple'))
+            # dyn_tag_points.append(axes.scatter3D(dyn_coord[0], dyn_coord[1], dyn_coord[2], 'k', c='purple'))
+            tag_point, tag_lines = plotDynamicTag(camera, master_angle, dyn_point, axes)
+            dyn_tag_points.append(tag_point)
+            lines += tag_lines
+            
 
     ppl.pause(0.0000000001)
 
