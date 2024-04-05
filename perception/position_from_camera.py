@@ -125,12 +125,12 @@ objectPoints = {
     14: np.array([[1836., 2020+tagsize, 0.], [1836., 2020., 0.], [1836+tagsize, 2020., 0.], [1836+tagsize, 2020+tagsize, 0.]]),
     15: np.array([[1226., 2020., 0.], [1226+tagsize, 2020., 0.], [1226+tagsize, 2020+tagsize, 0.], [1226., 2020+tagsize, 0.]]),
     12: np.array([[616., 2020+tagsize, 0.], [616., 2020., 0.], [616+tagsize, 2020., 0.], [616+tagsize, 2020+tagsize, 0.]]),
-    22: np.array([[616., 2437., 22.], [616+tagsize, 2437., 22.], [616+tagsize, 2437, 22+tagsize], [616, 2437, 22+tagsize]]),
-    19: np.array([[1226., 2437., 55.], [1226+tagsize, 2437., 55.], [1226+tagsize, 2437, 55+tagsize], [1226, 2437, 55+tagsize]]),
-    24: np.array([[1836., 2437., 22.], [1836+tagsize, 2437., 22.], [1836+tagsize, 2437, 22+tagsize], [1836, 2437, 22+tagsize]]),
-    9: np.array([[2446., 2437., 23.], [2446+tagsize, 2437., 23.], [2446+tagsize, 2437, 23+tagsize], [2446, 2437, 23+tagsize]]),
-    23: np.array([[3050., 1414+tagsize, 32.], [3050., 1414., 32.], [3050, 1414., 32 + tagsize], [3050, 1414+tagsize, 32 + tagsize]]),
-    18: np.array([[3050., 805+tagsize, 16.], [3050., 805., 16.], [3050, 805., 16 + tagsize], [3050, 805+tagsize, 16 + tagsize]])
+    22: np.array([[616+tagsize, 2437., 22.], [616+tagsize, 2437, 22+tagsize], [616, 2437, 22+tagsize], [616., 2437., 22.]]),
+    19: np.array([[1226+tagsize, 2437, 55+tagsize], [1226, 2437, 55+tagsize],[1226., 2437., 55.], [1226+tagsize, 2437., 55.]]),
+    24: np.array([[1836, 2437, 22+tagsize], [1836., 2437., 22.], [1836+tagsize, 2437., 22.], [1836+tagsize, 2437, 22+tagsize]]),
+    9: np.array([[2446+tagsize, 2437, 23+tagsize], [2446, 2437, 23+tagsize], [2446., 2437., 23.], [2446+tagsize, 2437., 23.]]),
+    23: np.array([[3050., 1414., 32.], [3050, 1414., 32 + tagsize], [3050, 1414+tagsize, 32 + tagsize], [3050., 1414+tagsize, 32.]]),
+    18: np.array([[3050, 805+tagsize, 16 + tagsize], [3050., 805+tagsize, 16.], [3050., 805., 16.], [3050, 805., 16 + tagsize]])
 }
 
 
@@ -168,7 +168,7 @@ camera_points = []
 dyn_tag_points = []
 arr_pose_t = []
 arr_angles = []
-while not vs.isOpened():
+while vs.isOpened():
     lines = []
     ret, image = vs.read()
     if not ret:
