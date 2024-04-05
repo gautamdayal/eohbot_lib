@@ -111,6 +111,7 @@ if vs.isOpened():
         print(obstacle_points)
         # print(occupancy)
         occupancy_graph = get_graph(occupancy)
+        occ_grid.cla()
         occ_grid.imshow(np.rot90(occupancy))
         waypoints = get_waypoints(get_path(occupancy_graph, start, (12, 10)))
         for p in waypoints:
