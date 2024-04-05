@@ -6,6 +6,7 @@ import cv2
 import matplotlib.pyplot as ppl
 import pupil_apriltags as apriltag
 from perception.Perception import *
+from planning.astar import *
 
 teensy = serial.Serial("/dev/ttyACM0")
 teensy.baudrate = 9600
@@ -79,4 +80,12 @@ while vs.isOpened():
         break
     
     camera, obstacle_points = get_robot_obstacle_points(frame, axes)
-    print(camera, obstacle_points)
+    occupancy, start = generate_occupancy(camera, obstacle_points)
+    occupancy_graph = get_graph(occupancy)
+    waypoints = get_waypoints(get_path(occupancy_graph, (1, 1), (12, 10)))
+    motor_commands = waypoint_following(waypoints)
+    for cmd in motor_commands:
+        teensy.write(encode_angle(cmd[0]).encode())
+        time.sleep(cmd[1])
+        teensy.write(encode_angle(999).encode())
+        time.sleep(0.5)
