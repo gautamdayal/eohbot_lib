@@ -89,9 +89,9 @@ occupancy_grid = np.array([
 # plt.show()
 
 
-test_grid, bot_pos = generate_occupancy(np.array([2500, 2560]), [np.array([5000, 6000]), np.array([10000, 10000])])
-waypoints = get_waypoints(get_path(get_graph(test_grid), bot_pos, (8, 8)))
-plt.imshow(test_grid)
-for wp in waypoints:
-    plt.scatter(wp[0], wp[1], color="red")
-plt.show()
+# test_grid, bot_pos = generate_occupancy(np.array([2500, 2560]), [np.array([5000, 6000]), np.array([10000, 10000])])
+# waypoints = get_waypoints(get_path(get_graph(test_grid), bot_pos, (8, 8)))
+# plt.imshow(test_grid)
+# for wp in waypoints:
+#     plt.scatter(wp[0], wp[1], color="red")
+# plt.show()
