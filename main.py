@@ -107,7 +107,10 @@ if vs.isOpened():
         ret, frame = vs.read()
         image, camera, obstacle_points = get_robot_obstacle_points(frame, axes)
     # ppl.pause(0.0000001)
-        occupancy, start = generate_occupancy(camera, obstacle_points)
+        occupancy, start0 = generate_occupancy(camera, obstacle_points)
+        if (start0[0] < 13 and start[0] >= 1) and (start[1] >= 1 and start[1] <= 10):
+            start1 = start0
+            
         print(obstacle_points)
         # print(occupancy)
         occupancy_graph = get_graph(occupancy)
