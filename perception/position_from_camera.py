@@ -16,18 +16,12 @@ def plotDynamicTag(Cesc, rvec, dtagloc, ax=None):
     y_tag = [0, dtagloc[1], 0]
     z_tag = [0, 0, dtagloc[2]]
     
-    x_esc = R.T @ x_tag + Cesc
-    y_esc = R.T @ y_tag + Cesc
-    z_esc = R.T @ z_tag + Cesc
-    
     vec_esc = R.T @ x_tag + R.T@y_tag + R.T@z_tag + Cesc
-    # print(R.T@x_tag, R.T@y_tag, R.T@z_tag)
-    # 
-    # ax.plot3D((Cesc[0], x_esc[0]), (Cesc[1], x_esc[1]), (Cesc[2], x_esc[2]), '--r'),
-    #             ax.plot3D((Cesc[0], y_esc[0]), (Cesc[1], y_esc[1]), (Cesc[2], y_esc[2]), '--g'),
-    #             ax.plot3D((Cesc[0], z_esc[0]), (Cesc[1], z_esc[1]), (Cesc[2], z_esc[2]), '--b'),
+
     point = ax.scatter3D(vec_esc[0], vec_esc[1], vec_esc[2], 'k', c='purple')
     tag_plot = [ax.plot3D((Cesc[0], vec_esc[0]), (Cesc[1], vec_esc[1]), (Cesc[2], vec_esc[2]), '-k')]
+    
+    return vec_esc, point, tag_plot
     
     return point, tag_plot
 
@@ -142,10 +136,9 @@ with np.load(npz_file) as data:
 
 vs = cv2.VideoCapture(camera)
 detector = apriltag.Detector(families=family)
-fig = ppl.figure(figsize=ppl.figaspect(0.5))
-axes = fig.add_subplot(1,2,1,projection='3d')
+fig = ppl.figure(figsize=(4,4))
+axes = ppl.axes(projection='3d')
 axes.set_box_aspect([1.0,1.0,1.0])
-stats = fig.add_subplot(1,2,2)
 axes.set_xlabel('X (mm)')
 axes.set_ylabel('Y (mm)')
 axes.set_zlabel('Z (mm)')
@@ -169,6 +162,7 @@ dyn_tag_points = []
 arr_pose_t = []
 arr_angles = []
 while vs.isOpened():
+    obstacle_points = []
     lines = []
     ret, image = vs.read()
     if not ret:
@@ -223,10 +217,10 @@ while vs.isOpened():
             arr_pose_t.append(pose)
             temp_arr = 1000 * np.array(arr_pose_t)
             
-            stats.cla()
-            stats.plot(temp_arr[:,0], c = "red")
-            stats.plot(temp_arr[:,1], c = "green")
-            stats.plot(temp_arr[:,2], c = "blue")
+            # stats.cla()
+            # stats.plot(temp_arr[:,0], c = "red")
+            # stats.plot(temp_arr[:,1], c = "green")
+            # stats.plot(temp_arr[:,2], c = "blue")
             
             # camera_points.append(axes.scatter3D(1000 * r.pose_t[0,0], 1000 * r.pose_t[1,0], 1000 * r.pose_t[2,0], 'k', c='purple'))
             dyn_points.append(1000 * pose)
@@ -273,21 +267,12 @@ while vs.isOpened():
         camera_points.append(camera_point)
         
         for dyn_point in dyn_points:
-            # camera_hoomg = np.array([*camera, 1])
-            # dyn_coord = np.dot(dyn_point, camera_hoomg)
-            # dyn_coord = dyn_coord[:3] / dyn_coord[3]
-            # R = cv2.Rodrigues(angle)[0]
-            # dyn_point *= -1
-            # dyn_point = np.array([dyn_point[1], dyn_point[0], dyn_point[2]])
-            # dyn_coord = camera - R.T @ dyn_point
-            # dyn_coord = camera + np.array([-dyn_point[2], dyn_point[0], -dyn_point[1]])
-            # dyn_coord = [camera[0] + dyn_point[0], camera[1] + dyn_point[2], camera[2] + dyn_point[1]]
-            # dyn_tag_points.append(axes.scatter3D(dyn_coord[0], dyn_coord[1], dyn_coord[2], 'k', c='purple'))
-            tag_point, tag_lines = plotDynamicTag(camera, master_angle, dyn_point, axes)
+            obs_point, tag_point, tag_lines = plotDynamicTag(camera, master_angle, dyn_point, axes)
+            obstacle_points.append(obs_point[:2])
             dyn_tag_points.append(tag_point)
             lines += tag_lines
             
-
+    print(obstacle_points)
     ppl.pause(0.0000000001)
 
     for line in lines:
@@ -295,7 +280,7 @@ while vs.isOpened():
         line[0].remove()
     lines.clear()
 
-    if len(dyn_tag_points) > 5:
+    if len(dyn_tag_points) > 15:
         dyn_tag_points[0].remove()
         dyn_tag_points = dyn_tag_points[1:]
 

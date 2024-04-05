@@ -128,29 +128,30 @@ with np.load(npz_file) as data:
 
 
 detector = apriltag.Detector(families=family)
+
+### CODE TO GO INTO MAIN.PY
 # vs = cv2.VideoCapture(camera)
-fig = ppl.figure(figsize=ppl.figaspect(0.5))
-axes = fig.add_subplot(1,2,1,projection='3d')
-axes.set_box_aspect([1.0,1.0,1.0])
-stats = fig.add_subplot(1,2,2)
-axes.set_xlabel('X (mm)')
-axes.set_ylabel('Y (mm)')
-axes.set_zlabel('Z (mm)')
-axes.azim = -90
-axes.elev = 40
+# fig = ppl.figure(figsize=(4,4))
+# axes = ppl.axes(projection='3d')
+# axes.set_box_aspect([1.0,1.0,1.0])
+# axes.set_xlabel('X (mm)')
+# axes.set_ylabel('Y (mm)')
+# axes.set_zlabel('Z (mm)')
+# axes.azim = -90
+# axes.elev = 40
 
-for _,objectPoint in objectPoints.items():
-    axes.scatter3D(objectPoint[0, 0], objectPoint[0, 1], objectPoint[0, 2], '-k', c='blue')
+# for _,objectPoint in objectPoints.items():
+#     axes.scatter3D(objectPoint[0, 0], objectPoint[0, 1], objectPoint[0, 2], '-k', c='blue')
 
-    axes.plot3D((objectPoint[0, 0], objectPoint[1, 0]), (objectPoint[0, 1], objectPoint[1, 1]),
-                (objectPoint[0, 2], objectPoint[1, 2]), '-g')
-    axes.plot3D((objectPoint[1, 0], objectPoint[2, 0]), (objectPoint[1, 1], objectPoint[2, 1]),
-                (objectPoint[1, 2], objectPoint[2, 2]), '-g')
-    axes.plot3D((objectPoint[2, 0], objectPoint[3, 0]), (objectPoint[2, 1], objectPoint[3, 1]),
-                (objectPoint[2, 2], objectPoint[3, 2]), '-g')
-    axes.plot3D((objectPoint[3, 0], objectPoint[0, 0]), (objectPoint[3, 1], objectPoint[0, 1]),
-                (objectPoint[3, 2], objectPoint[0, 2]), '-g')
-ppl.show()
+#     axes.plot3D((objectPoint[0, 0], objectPoint[1, 0]), (objectPoint[0, 1], objectPoint[1, 1]),
+#                 (objectPoint[0, 2], objectPoint[1, 2]), '-g')
+#     axes.plot3D((objectPoint[1, 0], objectPoint[2, 0]), (objectPoint[1, 1], objectPoint[2, 1]),
+#                 (objectPoint[1, 2], objectPoint[2, 2]), '-g')
+#     axes.plot3D((objectPoint[2, 0], objectPoint[3, 0]), (objectPoint[2, 1], objectPoint[3, 1]),
+#                 (objectPoint[2, 2], objectPoint[3, 2]), '-g')
+#     axes.plot3D((objectPoint[3, 0], objectPoint[0, 0]), (objectPoint[3, 1], objectPoint[0, 1]),
+#                 (objectPoint[3, 2], objectPoint[0, 2]), '-g')
+# ppl.show()
 
 camera_points = []
 dyn_tag_points = []
@@ -264,7 +265,7 @@ def get_robot_obstacle_points(image, axes):
         line[0].remove()
     lines.clear()
 
-    if len(dyn_tag_points) > 5:
+    if len(dyn_tag_points) > 15:
         dyn_tag_points[0].remove()
         dyn_tag_points = dyn_tag_points[1:]
 
