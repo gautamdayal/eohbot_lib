@@ -104,6 +104,21 @@ if vs.isOpened():
         time.sleep(cmd[1])
         teensy.write(encode_angle(999).encode())
         time.sleep(0.5)
+        ret, frame = vs.read()
+        image, camera, obstacle_points = get_robot_obstacle_points(frame, axes)
+    # ppl.pause(0.0000001)
+        occupancy, start = generate_occupancy(camera, obstacle_points)
+        print(obstacle_points)
+        # print(occupancy)
+        occupancy_graph = get_graph(occupancy)
+        occ_grid.imshow(np.rot90(occupancy))
+        waypoints = get_waypoints(get_path(occupancy_graph, start, (12, 10)))
+        for p in waypoints:
+            occ_grid.scatter(p[0], 11-p[1], color="red")
+        ppl.pause(0.0000001)
+        # cv2.imshow("camera", frame)
+        print("Sending commands")
+        motor_commands = waypoint_following(waypoints)
 
     teensy.write(encode_angle(999).encode())
     
