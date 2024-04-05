@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 # Heuristic function (euclidean distance works)
 def euclidean_dist(p1, p2):
-    return np.linalg.norm(np.array(p1)-np.array(p2), 2)
+    return abs(p1[1]-p2[1]) + abs(p1[0] - p2[0])
 
 # Generate binary occupancy grid using obstacle locations. Process the robot position to be a grid square as well
 def generate_occupancy(robot_position, obstacle_positions):
@@ -22,7 +22,7 @@ def generate_occupancy(robot_position, obstacle_positions):
     obstacle_positions_grid = [np.around(pos/GRANULARITY) for pos in obstacle_positions]
     # print(obstacle_positions_grid)
     for obstacle in obstacle_positions_grid:
-        result[int(obstacle[0] + 1), int(obstacle[1] + 1)] = 1
+        result[min(int(obstacle[0] + 1), 13), min(int(obstacle[1] + 1), 11)] = 1
 
     # return grid and start point
     return result, (int(robot_position_grid[0]), int(robot_position_grid[1]))
@@ -67,32 +67,3 @@ def get_waypoints(path):
     result.append(path[len(path) - 1])
     return result
 
-# Test occupancy grid for now
-occupancy_grid = np.array([
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1, 1, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1, 1, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-])
-
-
-# path = get_path(get_graph(occupancy_grid))
-
-# plt.imshow(occupancy_grid)
-# for p in get_waypoints(path):
-#     plt.scatter(p[1], p[0], color="red")
-# plt.show()
-
-
-# test_grid, bot_pos = generate_occupancy(np.array([2500, 2560]), [np.array([5000, 6000]), np.array([10000, 10000])])
-# waypoints = get_waypoints(get_path(get_graph(test_grid), bot_pos, (8, 8)))
-# plt.imshow(test_grid)
-# for wp in waypoints:
-#     plt.scatter(wp[0], wp[1], color="red")
-# plt.show()

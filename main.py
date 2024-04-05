@@ -17,7 +17,7 @@ def waypoint_following(waypoints):
         curr_wp = waypoints[i]
         next_wp = waypoints[i+1]
         dist = 250 * np.linalg.norm(np.array(curr_wp) - np.array(next_wp))
-        curr_delay = dist/400
+        curr_delay = dist/408
         curr_angle = np.rad2deg(np.arctan2(next_wp[0]-curr_wp[0], next_wp[1] - curr_wp[1])) % 360
         angle_delay_pairs.append((int(curr_angle), curr_delay))
     return angle_delay_pairs
@@ -28,7 +28,7 @@ def encode_angle(angle):
 
 ## EOH CONFIG
 dyn_ids = [29,32,30,31,34]
-static_ids = [13,21,2,4,16,11,20,17,10,14,15,12,22,19,24,9,23,18]
+static_ids = [13,21,2,4,16,11,20,17,10,14,15,12,22,19,24,9,23,18,6]
 objectPoints = {
     13: np.array([[616+tagsize, 805+tagsize, 0.], [616., 805+tagsize, 0.], [616., 805., 0.], [616+tagsize, 805, 0.]]),
     21: np.array([[1226+tagsize, 805+tagsize, 0.], [1226., 805+tagsize, 0.], [1226., 805., 0.], [1226+tagsize, 805, 0.]]),
@@ -47,7 +47,8 @@ objectPoints = {
     24: np.array([[1836, 2437, 22+tagsize], [1836., 2437., 22.], [1836+tagsize, 2437., 22.], [1836+tagsize, 2437, 22+tagsize]]),
     9: np.array([[2446+tagsize, 2437, 23+tagsize], [2446, 2437, 23+tagsize], [2446., 2437., 23.], [2446+tagsize, 2437., 23.]]),
     23: np.array([[3050., 1414., 32.], [3050, 1414., 32 + tagsize], [3050, 1414+tagsize, 32 + tagsize], [3050., 1414+tagsize, 32.]]),
-    18: np.array([[3050, 805+tagsize, 16 + tagsize], [3050., 805+tagsize, 16.], [3050., 805., 16.], [3050, 805., 16 + tagsize]])
+    18: np.array([[3050, 805+tagsize, 16 + tagsize], [3050., 805+tagsize, 16.], [3050., 805., 16.], [3050, 805., 16 + tagsize]]),
+    6: np.array([[3350., 2437-tagsize, 10.], [3350., 2437-tagsize, 10 + tagsize], [3350., 2437., 10 + tagsize], [3350., 2437., 10.]])
 }
 
 vs = cv2.VideoCapture(0)
@@ -108,8 +109,8 @@ if vs.isOpened():
         image, camera, obstacle_points = get_robot_obstacle_points(frame, axes)
     # ppl.pause(0.0000001)
         occupancy, start0 = generate_occupancy(camera, obstacle_points)
-        if (start0[0] < 13 and start[0] >= 1) and (start[1] >= 1 and start[1] <= 10):
-            start1 = start0
+        if (start0[0] < 13 and start0[0] >= 1) and (start0[1] >= 1 and start0[1] <= 10):
+            start = start0
             
         print(obstacle_points)
         # print(occupancy)
