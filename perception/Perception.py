@@ -3,6 +3,11 @@ import numpy as np
 import matplotlib.pyplot as ppl
 import pupil_apriltags as apriltag
 
+import cv2
+import numpy as np
+import matplotlib.pyplot as ppl
+import pupil_apriltags as apriltag
+
 
 def PolyArea2D(pts):
     l = np.hstack([pts, np.roll(pts, -1, axis=0)])
@@ -22,8 +27,6 @@ def plotDynamicTag(Cesc, rvec, dtagloc, ax=None):
     tag_plot = [ax.plot3D((Cesc[0], vec_esc[0]), (Cesc[1], vec_esc[1]), (Cesc[2], vec_esc[2]), '-k')]
     
     return vec_esc, point, tag_plot
-    
-    return point, tag_plot
 
 def plotCamera3D(Cesc, rvec, ax=None):
     if ax is None:
@@ -81,15 +84,6 @@ tagsize = 100.0
 family = "tag25h9"
 camera = 0
 
-## Wall configuration
-# dyn_ids = [9,4]
-# static_ids = [3,1,7,5]
-# ids = {3:0, 1:1, 7:2, 5:3}
-# objectPoints = [np.array([[0., 0., 0.], [0., tagsize, 0.], [0., tagsize, tagsize], [0., 0., tagsize]]),
-#                 np.array([[0., 201., tagsize], [0., 201., 0.], [0., 201 + tagsize, 0.], [0., 201 + tagsize, tagsize]]),
-#                 np.array([[0., 0., -108.], [0., 0., -108 - tagsize,], [0., tagsize, -108 - tagsize], [0., tagsize, -108.]]),
-#                 np.array([[-13., -42., tagsize], [-13-tagsize, -42., tagsize], [-13-tagsize, -42., 0.], [-13., -42., 0.]])]
-
 ## Living room configuration
 # dyn_ids = [29, 32]
 # static_ids = [10,12,14,15,16,17,20]
@@ -133,41 +127,40 @@ with np.load(npz_file) as data:
     dist_coeffs = data['dist_coeffs']
 
 
-
-vs = cv2.VideoCapture(camera)
 detector = apriltag.Detector(families=family)
-fig = ppl.figure(figsize=(4,4))
-axes = ppl.axes(projection='3d')
-axes.set_box_aspect([1.0,1.0,1.0])
-axes.set_xlabel('X (mm)')
-axes.set_ylabel('Y (mm)')
-axes.set_zlabel('Z (mm)')
-axes.azim = -90
-axes.elev = 40
 
-for _,objectPoint in objectPoints.items():
-    axes.scatter3D(objectPoint[0, 0], objectPoint[0, 1], objectPoint[0, 2], '-k', c='blue')
+### CODE TO GO INTO MAIN.PY
+# vs = cv2.VideoCapture(camera)
+# fig = ppl.figure(figsize=(4,4))
+# axes = ppl.axes(projection='3d')
+# axes.set_box_aspect([1.0,1.0,1.0])
+# axes.set_xlabel('X (mm)')
+# axes.set_ylabel('Y (mm)')
+# axes.set_zlabel('Z (mm)')
+# axes.azim = -90
+# axes.elev = 40
 
-    axes.plot3D((objectPoint[0, 0], objectPoint[1, 0]), (objectPoint[0, 1], objectPoint[1, 1]),
-                (objectPoint[0, 2], objectPoint[1, 2]), '-g')
-    axes.plot3D((objectPoint[1, 0], objectPoint[2, 0]), (objectPoint[1, 1], objectPoint[2, 1]),
-                (objectPoint[1, 2], objectPoint[2, 2]), '-g')
-    axes.plot3D((objectPoint[2, 0], objectPoint[3, 0]), (objectPoint[2, 1], objectPoint[3, 1]),
-                (objectPoint[2, 2], objectPoint[3, 2]), '-g')
-    axes.plot3D((objectPoint[3, 0], objectPoint[0, 0]), (objectPoint[3, 1], objectPoint[0, 1]),
-                (objectPoint[3, 2], objectPoint[0, 2]), '-g')
+# for _,objectPoint in objectPoints.items():
+#     axes.scatter3D(objectPoint[0, 0], objectPoint[0, 1], objectPoint[0, 2], '-k', c='blue')
+
+#     axes.plot3D((objectPoint[0, 0], objectPoint[1, 0]), (objectPoint[0, 1], objectPoint[1, 1]),
+#                 (objectPoint[0, 2], objectPoint[1, 2]), '-g')
+#     axes.plot3D((objectPoint[1, 0], objectPoint[2, 0]), (objectPoint[1, 1], objectPoint[2, 1]),
+#                 (objectPoint[1, 2], objectPoint[2, 2]), '-g')
+#     axes.plot3D((objectPoint[2, 0], objectPoint[3, 0]), (objectPoint[2, 1], objectPoint[3, 1]),
+#                 (objectPoint[2, 2], objectPoint[3, 2]), '-g')
+#     axes.plot3D((objectPoint[3, 0], objectPoint[0, 0]), (objectPoint[3, 1], objectPoint[0, 1]),
+#                 (objectPoint[3, 2], objectPoint[0, 2]), '-g')
+# ppl.show()
 
 camera_points = []
 dyn_tag_points = []
 arr_pose_t = []
 arr_angles = []
-while vs.isOpened():
-    obstacle_points = []
-    lines = []
-    ret, image = vs.read()
-    if not ret:
-        break
 
+def get_robot_obstacle_points(image, axes):
+    lines = []
+    obstacle_points = []
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     results = detector.detect(gray, 
                               estimate_tag_pose=True,
@@ -179,7 +172,6 @@ while vs.isOpened():
     dyn_points = []
     
     for r in results:
-        
         # extract the bounding box (x, y)-coordinates for the AprilTag
         # and convert each of the (x, y)-coordinate pairs to integers
         imagePoints = r.corners
@@ -210,19 +202,15 @@ while vs.isOpened():
             # print("Tag not found", r.tag_id)
             continue
         elif r.tag_id in dyn_ids:
-            #x, z useful, y not useful
-            # print("Dynamic Tag found", r.tag_id)
-            # print("Tag info",r.pose_R)
             pose = r.pose_t.reshape(3)
-            arr_pose_t.append(pose)
-            temp_arr = 1000 * np.array(arr_pose_t)
             
-            # stats.cla()
-            # stats.plot(temp_arr[:,0], c = "red")
-            # stats.plot(temp_arr[:,1], c = "green")
-            # stats.plot(temp_arr[:,2], c = "blue")
+            # arr_pose_t.append(pose)
+            # temp_arr = 1000 * np.array(arr_pose_t)
+            # t_stats.cla()
+            # t_stats.plot(temp_arr[:,0], c = "red")
+            # t_stats.plot(temp_arr[:,1], c = "green")
+            # t_stats.plot(temp_arr[:,2], c = "blue")
             
-            # camera_points.append(axes.scatter3D(1000 * r.pose_t[0,0], 1000 * r.pose_t[1,0], 1000 * r.pose_t[2,0], 'k', c='purple'))
             dyn_points.append(1000 * pose)
             continue
         
@@ -251,10 +239,8 @@ while vs.isOpened():
             cos_angle = cos_angle + (np.cos(angle_fusion[i]).reshape(3) * ratio[i])
             master_angle = master_angle + (angle_fusion[i].reshape(3) * ratio[i])
             
-        angle = np.arctan(sin_angle / cos_angle)
         # master_angle = np.array([normalize_angle(master_angle[0]), normalize_angle(master_angle[1]), normalize_angle(master_angle[2])])
 
-        angle[0] = angle[0] - np.pi
         # arr_angles.append(master_angle)
         # temp_arr = np.array(arr_angles)
         
@@ -268,15 +254,14 @@ while vs.isOpened():
         
         for dyn_point in dyn_points:
             obs_point, tag_point, tag_lines = plotDynamicTag(camera, master_angle, dyn_point, axes)
-            obstacle_points.append(obs_point[:2])
+            obstacle_points.append(obs_point)
             dyn_tag_points.append(tag_point)
             lines += tag_lines
             
-    print(obstacle_points)
+
     ppl.pause(0.0000000001)
 
     for line in lines:
-        # axes.lines.remove(line)
         line[0].remove()
     lines.clear()
 
@@ -294,10 +279,6 @@ while vs.isOpened():
     if len(arr_angles) > 100:
         arr_angles = arr_angles[1:]
 
-    cv2.imshow("camera", image)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-ppl.show()
-vs.release()
-cv2.destroyAllWindows()
+    return camera, obstacle_points
+        
+        
