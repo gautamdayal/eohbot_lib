@@ -9,7 +9,7 @@ grid.
 
 ### Planning 
 
-Grid search from current position to goal. Input: occupancy grid. Output: series of coordinates to get to goal. 
+Grid search from current position to goal. Input: occupancy grid. Output: series of coordinates to get to goal. Path is post-processed to return intermediate waypoints instead of the entire path to reduce the number of motor commands needed.
 
 ### Control
 
