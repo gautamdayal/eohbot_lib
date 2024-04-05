@@ -153,11 +153,6 @@ detector = apriltag.Detector(families=family)
 #                 (objectPoint[3, 2], objectPoint[0, 2]), '-g')
 # ppl.show()
 
-camera_points = []
-dyn_tag_points = []
-arr_pose_t = []
-arr_angles = []
-
 def get_robot_obstacle_points(image, axes):
     lines = []
     obstacle_points = []
