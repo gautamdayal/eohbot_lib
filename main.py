@@ -17,7 +17,7 @@ def waypoint_following(waypoints):
         curr_wp = waypoints[i]
         next_wp = waypoints[i+1]
         dist = 250 * np.linalg.norm(np.array(curr_wp) - np.array(next_wp))
-        curr_delay = dist/406
+        curr_delay = dist/400
         curr_angle = np.rad2deg(np.arctan2(next_wp[0]-curr_wp[0], next_wp[1] - curr_wp[1])) % 360
         angle_delay_pairs.append((int(curr_angle), curr_delay))
     return angle_delay_pairs
@@ -51,14 +51,18 @@ objectPoints = {
 }
 
 vs = cv2.VideoCapture(0)
-fig = ppl.figure(figsize=(4,4))
-axes = ppl.axes(projection='3d')
+fig = ppl.figure(figsize=(16,9))
+axes = fig.add_subplot(1,2,1,projection='3d')
 axes.set_box_aspect([1.0,1.0,1.0])
+occ_grid = fig.add_subplot(1,2,2)
 axes.set_xlabel('X (mm)')
 axes.set_ylabel('Y (mm)')
 axes.set_zlabel('Z (mm)')
+axes.set_xlim(0,3055)
+axes.set_ylim(0,2450)
+axes.set_zlim(0,40)
 axes.azim = -90
-axes.elev = 40
+axes.elev = 90
 
 for _,objectPoint in objectPoints.items():
     axes.scatter3D(objectPoint[0, 0], objectPoint[0, 1], objectPoint[0, 2], '-k', c='blue')
@@ -71,21 +75,38 @@ for _,objectPoint in objectPoints.items():
                 (objectPoint[2, 2], objectPoint[3, 2]), '-g')
     axes.plot3D((objectPoint[3, 0], objectPoint[0, 0]), (objectPoint[3, 1], objectPoint[0, 1]),
                 (objectPoint[3, 2], objectPoint[0, 2]), '-g')
-ppl.show()
+# ppl.show()
+ppl.pause(0.0000001)
+# ppl.clf()
 
-while vs.isOpened():
+if vs.isOpened():
     ret, frame = vs.read()
     if not ret:
         print("Can't get frame")
-        break
+        exit()
     
-    camera, obstacle_points = get_robot_obstacle_points(frame, axes)
+    image, camera, obstacle_points = get_robot_obstacle_points(frame, axes)
+    # ppl.pause(0.0000001)
     occupancy, start = generate_occupancy(camera, obstacle_points)
+    print(obstacle_points)
+    # print(occupancy)
     occupancy_graph = get_graph(occupancy)
-    waypoints = get_waypoints(get_path(occupancy_graph, (1, 1), (12, 10)))
+    occ_grid.imshow(np.rot90(occupancy))
+    waypoints = get_waypoints(get_path(occupancy_graph, start, (12, 10)))
+    for p in waypoints:
+        occ_grid.scatter(p[0], 11-p[1], color="red")
+    ppl.pause(0.0000001)
+    # cv2.imshow("camera", frame)
+    print("Sending commands")
     motor_commands = waypoint_following(waypoints)
     for cmd in motor_commands:
         teensy.write(encode_angle(cmd[0]).encode())
         time.sleep(cmd[1])
         teensy.write(encode_angle(999).encode())
         time.sleep(0.5)
+
+    teensy.write(encode_angle(999).encode())
+    
+ppl.show()
+vs.release()
+# cv2.destroyAllWindows()

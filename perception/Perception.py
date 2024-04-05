@@ -79,7 +79,7 @@ def getCamera3D(rvec, tvec):
     return Cesc
 
 
-npz_file = "calibration.npz"
+npz_file = "/home/rat/eohbot_lib/perception/calibration.npz"
 tagsize = 100.0
 family = "tag25h9"
 camera = 0
@@ -165,7 +165,7 @@ def get_robot_obstacle_points(image, axes):
     angle_fusion = []
     areas = []
     dyn_points = []
-    
+    camera = np.array([0,0,0])
     for r in results:
         # extract the bounding box (x, y)-coordinates for the AprilTag
         # and convert each of the (x, y)-coordinate pairs to integers
@@ -245,12 +245,12 @@ def get_robot_obstacle_points(image, axes):
         # stats.plot(temp_arr[:,2], c = "black")
     
         lines, camera_point = plotCamera3D(camera, master_angle, axes)
-        camera_points.append(camera_point)
+        # camera_points.append(camera_point)
         
         for dyn_point in dyn_points:
             obs_point, tag_point, tag_lines = plotDynamicTag(camera, master_angle, dyn_point, axes)
             obstacle_points.append(obs_point)
-            dyn_tag_points.append(tag_point)
+            # dyn_tag_points.append(tag_point)
             lines += tag_lines
             
 
@@ -260,20 +260,15 @@ def get_robot_obstacle_points(image, axes):
         line[0].remove()
     lines.clear()
 
-    if len(dyn_tag_points) > 15:
-        dyn_tag_points[0].remove()
-        dyn_tag_points = dyn_tag_points[1:]
+    # if len(dyn_tag_points) > 15:
+    #     dyn_tag_points[0].remove()
+    #     dyn_tag_points = dyn_tag_points[1:]
 
-    if len(camera_points) > 15:
-        camera_points[0].remove()
-        camera_points = camera_points[1:]
-        
-    if len(arr_pose_t) > 100:
-        arr_pose_t = arr_pose_t[1:]
-        
-    if len(arr_angles) > 100:
-        arr_angles = arr_angles[1:]
+    # if len(camera_points) > 15:
+    #     camera_points[0].remove()
+    #     camera_points = camera_points[1:]
 
-    return camera, obstacle_points
+    # cv2.imshow("camera", image)
+    return image, camera, obstacle_points
         
         

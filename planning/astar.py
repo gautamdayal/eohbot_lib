@@ -10,7 +10,7 @@ def euclidean_dist(p1, p2):
 def generate_occupancy(robot_position, obstacle_positions):
     # Create blank environment with occupied borders to handle edge cases
     GRANULARITY = 250 # Change this to get true size of robot as a granularity factor for the grid
-    shape = (13, 11)
+    shape = (14, 12)
     result = np.zeros(shape)
     result[0] = 1
     result[:,0] = 1
@@ -20,6 +20,7 @@ def generate_occupancy(robot_position, obstacle_positions):
     # Add obstacles based on given positions
     robot_position_grid = np.around(robot_position/GRANULARITY) + 1 # add one to account for padding around the environment
     obstacle_positions_grid = [np.around(pos/GRANULARITY) for pos in obstacle_positions]
+    # print(obstacle_positions_grid)
     for obstacle in obstacle_positions_grid:
         result[int(obstacle[0] + 1), int(obstacle[1] + 1)] = 1
 
