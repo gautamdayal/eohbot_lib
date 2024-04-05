@@ -76,8 +76,6 @@ def normalize_angle(angle):
     return angle
 
 def getCamera3D(rvec, tvec):
-    # Centro óptico de la cámara como un punto 3D expresado en el sistema de la escena
-    # t = -R @ Cesc => Cesc = -R^-1 @ t, pero R^-1 = R.T => Cesc = -R.T @ t
     R, _ = cv2.Rodrigues(rvec)
     Cesc = (-R.T @ tvec).reshape(3)
 
@@ -99,16 +97,40 @@ camera = 0
 #                 np.array([[-13., -42., tagsize], [-13-tagsize, -42., tagsize], [-13-tagsize, -42., 0.], [-13., -42., 0.]])]
 
 ## Living room configuration
-dyn_ids = [29, 32]
-static_ids = [10,12,14,15,16,17,20]
+# dyn_ids = [29, 32]
+# static_ids = [10,12,14,15,16,17,20]
+# objectPoints = {
+#     10: np.array([[0., 0., 160.], [-tagsize, 0., 160.], [-tagsize, 0., 160 + tagsize], [0., 0., 160 + tagsize]]),
+#     16: np.array([[-335-tagsize, 0., 160 + tagsize], [-335., 0., 160 + tagsize], [-335., 0., 160.], [-335-tagsize, 0., 160.]]),
+#     17: np.array([[-750., 0., 160 + tagsize], [-750., 0., 160.], [-750-tagsize, 0., 160.], [-750-tagsize, 0., 160 + tagsize]]),
+#     14: np.array([[-1220.0, 150 + tagsize, 160 + tagsize], [-1220., 150., 160 + tagsize], [-1220., 150., 160.], [-1220., 150 + tagsize, 160.]]),
+#     15: np.array([[-1220., 810 + tagsize, 160 + tagsize], [-1220., 810., 160 + tagsize], [-1220., 810., 160.], [-1220., 810+tagsize, 160.]]),
+#     12: np.array([[-315., 425+tagsize, 0.], [-315-tagsize, 425+tagsize, 0.], [-315-tagsize, 425., 0.], [-315., 425., 0.]]),
+#     20: np.array([[-750., 425., 0.], [-750., 425+tagsize, 0.], [-750-tagsize, 425+tagsize, 0.], [-750-tagsize, 425., 0.]])
+# }
+
+## EOH CONFIG
+dyn_ids = [29,32,30,31,34]
+static_ids = [13,21,2,4,16,11,20,17,10,14,15,12,22,19,24,9,23,18]
 objectPoints = {
-    10: np.array([[0., 0., 160.], [-tagsize, 0., 160.], [-tagsize, 0., 160 + tagsize], [0., 0., 160 + tagsize]]),
-    16: np.array([[-335-tagsize, 0., 160 + tagsize], [-335., 0., 160 + tagsize], [-335., 0., 160.], [-335-tagsize, 0., 160.]]),
-    17: np.array([[-750., 0., 160 + tagsize], [-750., 0., 160.], [-750-tagsize, 0., 160.], [-750-tagsize, 0., 160 + tagsize]]),
-    14: np.array([[-1220.0, 150 + tagsize, 160 + tagsize], [-1220., 150., 160 + tagsize], [-1220., 150., 160.], [-1220., 150 + tagsize, 160.]]),
-    15: np.array([[-1220., 810 + tagsize, 160 + tagsize], [-1220., 810., 160 + tagsize], [-1220., 810., 160.], [-1220., 810+tagsize, 160.]]),
-    12: np.array([[-315., 425+tagsize, 0.], [-315-tagsize, 425+tagsize, 0.], [-315-tagsize, 425., 0.], [-315., 425., 0.]]),
-    20: np.array([[-750., 425., 0.], [-750., 425+tagsize, 0.], [-750-tagsize, 425+tagsize, 0.], [-750-tagsize, 425., 0.]])
+    13: np.array([[616+tagsize, 805+tagsize, 0.], [616., 805+tagsize, 0.], [616., 805., 0.], [616+tagsize, 805, 0.]]),
+    21: np.array([[1226+tagsize, 805+tagsize, 0.], [1226., 805+tagsize, 0.], [1226., 805., 0.], [1226+tagsize, 805, 0.]]),
+    2: np.array([[1836., 805+tagsize, 0.], [1836., 805., 0.], [1836+tagsize, 805., 0.], [1836+tagsize, 805+tagsize, 0.]]),
+    4: np.array([[2446+tagsize, 805+tagsize, 0.], [2446., 805+tagsize, 0.], [2446., 805., 0.], [2446+tagsize, 805., 0.]]),
+    16: np.array([[2446., 1414., 0.], [2446+tagsize, 1414., 0.], [2446+tagsize, 1414+tagsize, 0.], [2446., 1414+tagsize, 0.]]),
+    11: np.array([[1836., 1414., 0.], [1836+tagsize, 1414., 0.], [1836+tagsize, 1414+tagsize, 0.], [1836., 1414+tagsize, 0.]]),
+    20: np.array([[1226+tagsize, 1414+tagsize, 0.], [1226., 1414+tagsize, 0.], [1226., 1414., 0.], [1226+tagsize, 1414., 0.]]),
+    17: np.array([[616+tagsize, 1414., 0.], [616+tagsize, 1414+tagsize, 0.], [616., 1414+tagsize, 0.], [616., 1414., 0.]]),
+    10: np.array([[2446., 2020., 0.], [2446+tagsize, 2020., 0.], [2446+tagsize, 2020+tagsize, 0.], [2446., 2020+tagsize, 0.]]),
+    14: np.array([[1836., 2020+tagsize, 0.], [1836., 2020., 0.], [1836+tagsize, 2020., 0.], [1836+tagsize, 2020+tagsize, 0.]]),
+    15: np.array([[1226., 2020., 0.], [1226+tagsize, 2020., 0.], [1226+tagsize, 2020+tagsize, 0.], [1226., 2020+tagsize, 0.]]),
+    12: np.array([[616., 2020+tagsize, 0.], [616., 2020., 0.], [616+tagsize, 2020., 0.], [616+tagsize, 2020+tagsize, 0.]]),
+    22: np.array([[616., 2437., 22.], [616+tagsize, 2437., 22.], [616+tagsize, 2437, 22+tagsize], [616, 2437, 22+tagsize]]),
+    19: np.array([[1226., 2437., 55.], [1226+tagsize, 2437., 55.], [1226+tagsize, 2437, 55+tagsize], [1226, 2437, 55+tagsize]]),
+    24: np.array([[1836., 2437., 22.], [1836+tagsize, 2437., 22.], [1836+tagsize, 2437, 22+tagsize], [1836, 2437, 22+tagsize]]),
+    9: np.array([[2446., 2437., 23.], [2446+tagsize, 2437., 23.], [2446+tagsize, 2437, 23+tagsize], [2446, 2437, 23+tagsize]]),
+    23: np.array([[3050., 1414+tagsize, 32.], [3050., 1414., 32.], [3050, 1414., 32 + tagsize], [3050, 1414+tagsize, 32 + tagsize]]),
+    18: np.array([[3050., 805+tagsize, 16.], [3050., 805., 16.], [3050, 805., 16 + tagsize], [3050, 805+tagsize, 16 + tagsize]])
 }
 
 
@@ -127,8 +149,8 @@ stats = fig.add_subplot(1,2,2)
 axes.set_xlabel('X (mm)')
 axes.set_ylabel('Y (mm)')
 axes.set_zlabel('Z (mm)')
-axes.azim = 30
-axes.elev = 20
+axes.azim = -90
+axes.elev = 40
 
 for _,objectPoint in objectPoints.items():
     axes.scatter3D(objectPoint[0, 0], objectPoint[0, 1], objectPoint[0, 2], '-k', c='blue')
@@ -146,7 +168,7 @@ camera_points = []
 dyn_tag_points = []
 arr_pose_t = []
 arr_angles = []
-while vs.isOpened():
+while not vs.isOpened():
     lines = []
     ret, image = vs.read()
     if not ret:
