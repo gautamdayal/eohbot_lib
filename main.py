@@ -10,10 +10,6 @@ def encode_angle(angle):
 
 while True:
     teensy.write(encode_angle(0).encode())
-    time.sleep(3)
-    teensy.write(encode_angle(90).encode())
-    time.sleep(3)
-    teensy.write(encode_angle(180).encode())
-    time.sleep(3)
-    teensy.write(encode_angle(270).encode())
-    time.sleep(3)
+    time.sleep(5)
+    teensy.write(encode_angle(999).encode())
+    time.sleep(10)
