@@ -2,8 +2,8 @@
 #include <drivetrain_hal.h>
 
 // Pin assignments
-#define MOTORS
-// #define SERIAL
+// #define MOTORS
+#define SERIAL
 
 MotorPins motor_1{M1_ENA, M1_IN1, M1_IN2};
 MotorPins motor_2{M2_ENA, M2_IN1, M2_IN2};
