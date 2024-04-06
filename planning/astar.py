@@ -3,8 +3,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Heuristic function (euclidean distance works)
-def euclidean_dist(p1, p2):
+def mahhattan_dist(p1, p2):
     return abs(p1[1]-p2[1]) + abs(p1[0] - p2[0])
+
+def euclidean(p1, p2):
+    return np.linalg.norm(np.array(p1) - np.array(p2))
 
 # Generate binary occupancy grid using obstacle locations. Process the robot position to be a grid square as well
 def generate_occupancy(robot_position, obstacle_positions):
@@ -17,39 +20,68 @@ def generate_occupancy(robot_position, obstacle_positions):
     result[:,shape[1] - 1] = 1
     result[shape[0] - 1] = 1
     
+
+
     # Add obstacles based on given positions
     robot_position_grid = np.around(robot_position/GRANULARITY) + 1 # add one to account for padding around the environment
     obstacle_positions_grid = [np.around(pos/GRANULARITY) for pos in obstacle_positions]
     # print(obstacle_positions_grid)
+    # positions = [[0, 0], [0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]]
+    positions=[[0, 0], [1, 0], [-1, 0]]
     for obstacle in obstacle_positions_grid:
-        result[min(int(obstacle[0] + 1), 13), min(int(obstacle[1] + 1), 11)] = 1
+        x = obstacle[0] + 1
+        y = obstacle[1] + 1
+        for x_offset, y_offset in positions:
+            result_x = x + x_offset
+            result_y = y + y_offset
+            result_x = int(max(0, min(result_x, 13)))
+            result_y = int(max(0, min(result_y, 11)))
+            # print(f'x: {result_x} y: {result_y}')
+            result[result_x, result_y] = 1
 
     # return grid and start point
+    # print(result)
     return result, (int(robot_position_grid[0]), int(robot_position_grid[1]))
 
 
 # Turn occupancy into a searchable networkx graph
+
+# def get_graph(occupancy_grid, num_directions=8):
+#     G = nx.Graph()
+#     rows, cols = occupancy_grid.shape
+#     for i in range(rows):
+#         for j in range(cols):
+
 def get_graph(occupancy_grid):
     G = nx.Graph()
     rows, cols = occupancy_grid.shape
-    for i in range(rows):
-        for j in range(cols):
-            if occupancy_grid[i, j] == 0:  
-                G.add_node((i, j))
-                if i > 0 and occupancy_grid[i - 1, j] == 0:
-                    G.add_edge((i, j), (i - 1, j))
-                if i < rows - 1 and occupancy_grid[i + 1, j] == 0:
-                    G.add_edge((i, j), (i + 1, j))
-                if j > 0 and occupancy_grid[i, j - 1] == 0:
-                    G.add_edge((i, j), (i, j - 1))
-                if j < cols - 1 and occupancy_grid[i, j + 1] == 0:
-                    G.add_edge((i, j), (i, j + 1))
+    for row in range(rows):
+        for col in range(cols):
+            if occupancy_grid[row, col] == 0:  
+                G.add_node((row, col))
+                if row > 0 and occupancy_grid[row - 1, col] == 0:
+                    G.add_edge((row, col), (row - 1, col))
+                if row < rows - 1 and occupancy_grid[row + 1, col] == 0:
+                    G.add_edge((row, col), (row + 1, col))
+                if col > 0 and occupancy_grid[row, col - 1] == 0:
+                    G.add_edge((row, col), (row, col - 1))
+                if col < cols - 1 and occupancy_grid[row, col + 1] == 0:
+                    G.add_edge((row, col), (row, col + 1))
+                # 8 directions
+                if row > 0 and col > 0 and occupancy_grid[row-1, col-1] == 0:
+                    G.add_edge((row, col), (row - 1, col - 1))
+                if row < rows-1 and col < cols - 1 and occupancy_grid[row+1, col+1] == 0:
+                    G.add_edge((row, col), (row + 1, col + 1))
+                if row < rows-1 and col > 0 and occupancy_grid[row+1, col-1] == 0:
+                    G.add_edge((row, col), (row + 1, col - 1))
+                if row > 0 and col < cols-1 and occupancy_grid[row-1, col+1] == 0:
+                    G.add_edge((row, col), (row - 1, col + 1))
     return G
 
 
 # Get path to follow from astar
 def get_path(G, start_node, goal_node):
-    path = nx.astar_path(G, start_node, goal_node, euclidean_dist)
+    path = nx.astar_path(G, start_node, goal_node, mahhattan_dist)
     return path
 
 # Get only waypoints from the path instead of every point

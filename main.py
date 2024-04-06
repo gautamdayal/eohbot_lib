@@ -79,6 +79,9 @@ for _,objectPoint in objectPoints.items():
 # ppl.show()
 ppl.pause(0.0000001)
 # ppl.clf()
+curr_obstacle_ids = []
+curr_obstacle_points = []
+obstacle_dict = {}
 
 if vs.isOpened():
     ret, frame = vs.read()
@@ -86,11 +89,21 @@ if vs.isOpened():
         print("Can't get frame")
         exit()
     
-    image, camera, obstacle_points = get_robot_obstacle_points(frame, axes)
+    image, camera, obstacle_points, obstacle_ids = get_robot_obstacle_points(frame, axes)
+    cv2.imshow("camera", image)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        exit()
+    for obstacle_coord, obstacle_id in zip(obstacle_points, obstacle_ids):
+        if obstacle_ids not in curr_obstacle_ids:
+            curr_obstacle_points.append(obstacle_coord)
     # ppl.pause(0.0000001)
-    occupancy, start = generate_occupancy(camera, obstacle_points)
-    print(obstacle_points)
+    occupancy, start = generate_occupancy(camera, curr_obstacle_points)
+    print(start)
+    # print(obstacle_points)
     # print(occupancy)
+    
+    #     if (start0[0] < 13 and start0[0] >= 1) and (start0[1] >= 1 and start0[1] <= 10):
+    #         start = start0
     occupancy_graph = get_graph(occupancy)
     occ_grid.imshow(np.rot90(occupancy))
     waypoints = get_waypoints(get_path(occupancy_graph, start, (12, 10)))
@@ -98,21 +111,46 @@ if vs.isOpened():
         occ_grid.scatter(p[0], 11-p[1], color="red")
     ppl.pause(0.0000001)
     # cv2.imshow("camera", frame)
-    print("Sending commands")
+    
     motor_commands = waypoint_following(waypoints)
-    for cmd in motor_commands:
+    while len(motor_commands) > 0:
+        print(motor_commands)
+        regen = False
+        cmd = motor_commands[0]
+        motor_commands = motor_commands[1:]
         teensy.write(encode_angle(cmd[0]).encode())
         time.sleep(cmd[1])
         teensy.write(encode_angle(999).encode())
         time.sleep(0.5)
+
+        for obstacle_coord, obstacle_id in zip(obstacle_points, obstacle_ids):
+            if obstacle_ids not in curr_obstacle_ids:
+                regen = True
+                curr_obstacle_ids.append(obstacle_ids)
+                curr_obstacle_points.append(obstacle_coord)
+        ppl.pause(0.0000001)
+        
         ret, frame = vs.read()
-        image, camera, obstacle_points = get_robot_obstacle_points(frame, axes)
-    # ppl.pause(0.0000001)
-        occupancy, start0 = generate_occupancy(camera, obstacle_points)
+        if not ret:
+            print("Can't get frame")
+            exit()
+        
+        image, camera, obstacle_points, obstacle_ids = get_robot_obstacle_points(frame, axes)
+        cv2.imshow("camera", image)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            exit()
+        for obstacle_coord, obstacle_id in zip(obstacle_points, obstacle_ids):
+            if obstacle_ids not in curr_obstacle_ids:
+                curr_obstacle_points.append(obstacle_coord)
+        # ppl.pause(0.0000001)
+        
+        occupancy, start0 = generate_occupancy(camera, curr_obstacle_points)
+        print(start0)
         if (start0[0] < 13 and start0[0] >= 1) and (start0[1] >= 1 and start0[1] <= 10):
             start = start0
+            print("reverting", start)
             
-        print(obstacle_points)
+        # print(obstacle_points)
         # print(occupancy)
         occupancy_graph = get_graph(occupancy)
         occ_grid.cla()
@@ -122,11 +160,43 @@ if vs.isOpened():
             occ_grid.scatter(p[0], 11-p[1], color="red")
         ppl.pause(0.0000001)
         # cv2.imshow("camera", frame)
-        print("Sending commands")
-        motor_commands = waypoint_following(waypoints)
+        print(f"Sending commands: {cmd}")
+        if regen:
+            motor_commands = waypoint_following(waypoints)
+
+
+    # for i in range(len(motor_commands)):
+    #     cmd = motor_commands[i]
+    #     teensy.write(encode_angle(cmd[0]).encode())
+    #     time.sleep(cmd[1])
+    #     teensy.write(encode_angle(999).encode())
+    #     time.sleep(0.5)
+    #     ret, frame = vs.read()
+    #     image, camera, obstacle_points, obstacle_ids = get_robot_obstacle_points(frame, axes)
+    #     for obstacle_coord, obstacle_id in zip(obstacle_points, obstacle_ids):
+    #         if obstacle_ids not in curr_obstacle_ids:
+    #             curr_obstacle_points.append(obstacle_coord)
+    #     ppl.pause(0.0000001)
+    #     occupancy, start0 = generate_occupancy(camera, curr_obstacle_points)
+    #     if (start0[0] < 13 and start0[0] >= 1) and (start0[1] >= 1 and start0[1] <= 10):
+    #         start = start0
+            
+    #     print(obstacle_points)
+    #     # print(occupancy)
+    #     occupancy_graph = get_graph(occupancy)
+    #     occ_grid.cla()
+    #     occ_grid.imshow(np.rot90(occupancy))
+    #     waypoints = get_waypoints(get_path(occupancy_graph, start, (12, 10)))
+    #     for p in waypoints:
+    #         occ_grid.scatter(p[0], 11-p[1], color="red")
+    #     ppl.pause(0.0000001)
+    #     # cv2.imshow("camera", frame)
+    #     print("Sending commands")
+    #     motor_commands = waypoint_following(waypoints)
+    #     i=0
 
     teensy.write(encode_angle(999).encode())
     
-ppl.show()
+ppl.close()
 vs.release()
 # cv2.destroyAllWindows()

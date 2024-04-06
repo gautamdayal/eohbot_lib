@@ -156,6 +156,7 @@ detector = apriltag.Detector(families=family)
 def get_robot_obstacle_points(image, axes):
     lines = []
     obstacle_points = []
+    obstacle_ids = []
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     results = detector.detect(gray, 
                               estimate_tag_pose=True,
@@ -207,6 +208,7 @@ def get_robot_obstacle_points(image, axes):
             # t_stats.plot(temp_arr[:,2], c = "blue")
             
             dyn_points.append(1000 * pose)
+            obstacle_ids.append(r.tag_id)
             continue
         
         areas.append((PolyArea2D(imagePoints)))
@@ -269,6 +271,6 @@ def get_robot_obstacle_points(image, axes):
     #     camera_points = camera_points[1:]
 
     # cv2.imshow("camera", image)
-    return image, camera, obstacle_points
+    return image, camera, obstacle_points, obstacle_ids
         
         
