@@ -1,6 +1,5 @@
 import serial
 import time
-import perception
 import numpy as np
 import cv2
 import matplotlib.pyplot as ppl

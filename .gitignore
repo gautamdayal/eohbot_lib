@@ -2,3 +2,5 @@
 
 # don't commit data text files
 data/*
+perception/tags/*
+perception/test_videos/*
