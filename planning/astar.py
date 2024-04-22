@@ -44,38 +44,34 @@ def generate_occupancy(robot_position, obstacle_positions):
     return result, (int(robot_position_grid[0]), int(robot_position_grid[1]))
 
 
+# Constant that defines the edge weight of going into or out of occupied space
+OBSTACLE_PENALTY = 10
+
 # Turn occupancy into a searchable networkx graph
-
-# def get_graph(occupancy_grid, num_directions=8):
-#     G = nx.Graph()
-#     rows, cols = occupancy_grid.shape
-#     for i in range(rows):
-#         for j in range(cols):
-
 def get_graph(occupancy_grid):
     G = nx.Graph()
     rows, cols = occupancy_grid.shape
     for row in range(rows):
         for col in range(cols):
-            if occupancy_grid[row, col] == 0:  
-                G.add_node((row, col))
-                if row > 0 and occupancy_grid[row - 1, col] == 0:
-                    G.add_edge((row, col), (row - 1, col))
-                if row < rows - 1 and occupancy_grid[row + 1, col] == 0:
-                    G.add_edge((row, col), (row + 1, col))
-                if col > 0 and occupancy_grid[row, col - 1] == 0:
-                    G.add_edge((row, col), (row, col - 1))
-                if col < cols - 1 and occupancy_grid[row, col + 1] == 0:
-                    G.add_edge((row, col), (row, col + 1))
-                # 8 directions
-                if row > 0 and col > 0 and occupancy_grid[row-1, col-1] == 0:
-                    G.add_edge((row, col), (row - 1, col - 1))
-                if row < rows-1 and col < cols - 1 and occupancy_grid[row+1, col+1] == 0:
-                    G.add_edge((row, col), (row + 1, col + 1))
-                if row < rows-1 and col > 0 and occupancy_grid[row+1, col-1] == 0:
-                    G.add_edge((row, col), (row + 1, col - 1))
-                if row > 0 and col < cols-1 and occupancy_grid[row-1, col+1] == 0:
-                    G.add_edge((row, col), (row - 1, col + 1))
+            
+            G.add_node((row, col))
+            if row > 0 and occupancy_grid[row - 1, col] == 0:
+                G.add_edge((row, col), (row - 1, col))
+            if row < rows - 1 and occupancy_grid[row + 1, col] == 0:
+                G.add_edge((row, col), (row + 1, col))
+            if col > 0 and occupancy_grid[row, col - 1] == 0:
+                G.add_edge((row, col), (row, col - 1))
+            if col < cols - 1 and occupancy_grid[row, col + 1] == 0:
+                G.add_edge((row, col), (row, col + 1))
+            # 8 directions
+            if row > 0 and col > 0 and occupancy_grid[row-1, col-1] == 0:
+                G.add_edge((row, col), (row - 1, col - 1))
+            if row < rows-1 and col < cols - 1 and occupancy_grid[row+1, col+1] == 0:
+                G.add_edge((row, col), (row + 1, col + 1))
+            if row < rows-1 and col > 0 and occupancy_grid[row+1, col-1] == 0:
+                G.add_edge((row, col), (row + 1, col - 1))
+            if row > 0 and col < cols-1 and occupancy_grid[row-1, col+1] == 0:
+                G.add_edge((row, col), (row - 1, col + 1))
     return G
 
 
