@@ -129,30 +129,6 @@ with np.load(npz_file) as data:
 
 detector = apriltag.Detector(families=family)
 
-### CODE TO GO INTO MAIN.PY
-# vs = cv2.VideoCapture(camera)
-# fig = ppl.figure(figsize=(4,4))
-# axes = ppl.axes(projection='3d')
-# axes.set_box_aspect([1.0,1.0,1.0])
-# axes.set_xlabel('X (mm)')
-# axes.set_ylabel('Y (mm)')
-# axes.set_zlabel('Z (mm)')
-# axes.azim = -90
-# axes.elev = 40
-
-# for _,objectPoint in objectPoints.items():
-#     axes.scatter3D(objectPoint[0, 0], objectPoint[0, 1], objectPoint[0, 2], '-k', c='blue')
-
-#     axes.plot3D((objectPoint[0, 0], objectPoint[1, 0]), (objectPoint[0, 1], objectPoint[1, 1]),
-#                 (objectPoint[0, 2], objectPoint[1, 2]), '-g')
-#     axes.plot3D((objectPoint[1, 0], objectPoint[2, 0]), (objectPoint[1, 1], objectPoint[2, 1]),
-#                 (objectPoint[1, 2], objectPoint[2, 2]), '-g')
-#     axes.plot3D((objectPoint[2, 0], objectPoint[3, 0]), (objectPoint[2, 1], objectPoint[3, 1]),
-#                 (objectPoint[2, 2], objectPoint[3, 2]), '-g')
-#     axes.plot3D((objectPoint[3, 0], objectPoint[0, 0]), (objectPoint[3, 1], objectPoint[0, 1]),
-#                 (objectPoint[3, 2], objectPoint[0, 2]), '-g')
-# ppl.show()
-
 def get_robot_obstacle_points(image, axes):
     lines = []
     obstacle_points = []
@@ -235,24 +211,12 @@ def get_robot_obstacle_points(image, axes):
             sin_angle = sin_angle + (np.sin(angle_fusion[i]).reshape(3) * ratio[i])
             cos_angle = cos_angle + (np.cos(angle_fusion[i]).reshape(3) * ratio[i])
             master_angle = master_angle + (angle_fusion[i].reshape(3) * ratio[i])
-            
-        # master_angle = np.array([normalize_angle(master_angle[0]), normalize_angle(master_angle[1]), normalize_angle(master_angle[2])])
-
-        # arr_angles.append(master_angle)
-        # temp_arr = np.array(arr_angles)
-        
-        # stats.cla()
-        # stats.plot(temp_arr[:,0], c = "purple")
-        # stats.plot(temp_arr[:,1], c = "orange")
-        # stats.plot(temp_arr[:,2], c = "black")
     
         lines, camera_point = plotCamera3D(camera, master_angle, axes)
-        # camera_points.append(camera_point)
         
         for dyn_point in dyn_points:
             obs_point, tag_point, tag_lines = plotDynamicTag(camera, master_angle, dyn_point, axes)
             obstacle_points.append(obs_point)
-            # dyn_tag_points.append(tag_point)
             lines += tag_lines
             
 
@@ -262,15 +226,6 @@ def get_robot_obstacle_points(image, axes):
         line[0].remove()
     lines.clear()
 
-    # if len(dyn_tag_points) > 15:
-    #     dyn_tag_points[0].remove()
-    #     dyn_tag_points = dyn_tag_points[1:]
-
-    # if len(camera_points) > 15:
-    #     camera_points[0].remove()
-    #     camera_points = camera_points[1:]
-
-    # cv2.imshow("camera", image)
     return image, camera, obstacle_points, obstacle_ids
         
         
