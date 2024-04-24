@@ -13,6 +13,7 @@
 // #define MOTORS
 #define SERIAL
 
+
 // Pin assignments
 MotorPins motor_1{M1_ENA, M1_IN1, M1_IN2};
 MotorPins motor_2{M2_ENA, M2_IN1, M2_IN2};
@@ -65,14 +66,18 @@ void loop() {
   Serial.println((float)event.acceleration.x);
 
   #ifdef MOTORS
-  for (int i = 0; i < 90; i++) {
-    direction_drive(i, 200, rat);
-    delay(25);
-  }
-  for (int i = 90; i > 0; i--) {
-    direction_drive(i, 200, rat);
-    delay(25);
-  }
+  direction_drive(60, 200, rat);
+  // delay(2);
+  // stop_robot(rat);
+  // delay(0.5);
+  // direction_drive(120, 200, rat);
+  // delay(2);
+  // stop_robot(rat);
+  // delay(0.5);
+  // direction_drive(270, 200, rat);
+  // delay(2);
+  // stop_robot(rat);
+  // delay(0.5);
   #endif MOTORS
 
   #ifdef SERIAL
