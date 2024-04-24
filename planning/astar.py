@@ -1,6 +1,5 @@
 import networkx as nx 
 import numpy as np
-import matplotlib.pyplot as plt
 
 # Heuristic function (euclidean distance works)
 def mahhattan_dist(p1, p2):
@@ -20,14 +19,12 @@ def generate_occupancy(robot_position, obstacle_positions):
     result[:,shape[1] - 1] = 1
     result[shape[0] - 1] = 1
     
-
-
     # Add obstacles based on given positions
-    robot_position_grid = np.around(robot_position/GRANULARITY) + 1 # add one to account for padding around the environment
+    robot_position_grid = np.around(robot_position/GRANULARITY) + 1 # Add one to account for padding around the environment
     obstacle_positions_grid = [np.around(pos/GRANULARITY) for pos in obstacle_positions]
-    # print(obstacle_positions_grid)
-    # positions = [[0, 0], [0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]]
-    positions=[[0, 0], [1, 0], [-1, 0]]
+    
+    # Set cells around obstacle as occupied space as well
+    positions = [[0, 0], [0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]] 
     for obstacle in obstacle_positions_grid:
         x = obstacle[0] + 1
         y = obstacle[1] + 1
@@ -44,38 +41,65 @@ def generate_occupancy(robot_position, obstacle_positions):
     return result, (int(robot_position_grid[0]), int(robot_position_grid[1]))
 
 
+# Constants that define edge weights given open or occupied space in grid
+OBSTACLE_PENALTY = 10
+OPEN_SPACE_WEIGHT = 1
+
 # Turn occupancy into a searchable networkx graph
-
-# def get_graph(occupancy_grid, num_directions=8):
-#     G = nx.Graph()
-#     rows, cols = occupancy_grid.shape
-#     for i in range(rows):
-#         for j in range(cols):
-
 def get_graph(occupancy_grid):
     G = nx.Graph()
     rows, cols = occupancy_grid.shape
     for row in range(rows):
         for col in range(cols):
-            if occupancy_grid[row, col] == 0:  
-                G.add_node((row, col))
-                if row > 0 and occupancy_grid[row - 1, col] == 0:
-                    G.add_edge((row, col), (row - 1, col))
-                if row < rows - 1 and occupancy_grid[row + 1, col] == 0:
-                    G.add_edge((row, col), (row + 1, col))
-                if col > 0 and occupancy_grid[row, col - 1] == 0:
-                    G.add_edge((row, col), (row, col - 1))
-                if col < cols - 1 and occupancy_grid[row, col + 1] == 0:
-                    G.add_edge((row, col), (row, col + 1))
-                # 8 directions
-                if row > 0 and col > 0 and occupancy_grid[row-1, col-1] == 0:
-                    G.add_edge((row, col), (row - 1, col - 1))
-                if row < rows-1 and col < cols - 1 and occupancy_grid[row+1, col+1] == 0:
-                    G.add_edge((row, col), (row + 1, col + 1))
-                if row < rows-1 and col > 0 and occupancy_grid[row+1, col-1] == 0:
-                    G.add_edge((row, col), (row + 1, col - 1))
-                if row > 0 and col < cols-1 and occupancy_grid[row-1, col+1] == 0:
-                    G.add_edge((row, col), (row - 1, col + 1))
+            G.add_node((row, col)) # Add all cells in occupancy grid as nodes
+            weight_to_set = OPEN_SPACE_WEIGHT # Helps set edge weight depending on occupancy grid values
+
+            # Cardinal Directions
+            if row > 0:
+                if occupancy_grid[row - 1, col] == 0:
+                    weight_to_set = OPEN_SPACE_WEIGHT
+                elif occupancy_grid[row - 1, col] == 1:
+                    weight_to_set = OBSTACLE_PENALTY
+                G.add_edge((row, col), (row - 1, col), weight=weight_to_set)
+            if row < rows - 1:
+                if occupancy_grid[row + 1, col] == 0:
+                    weight_to_set = OPEN_SPACE_WEIGHT
+                elif occupancy_grid[row + 1, col] == 1:
+                    weight_to_set = OBSTACLE_PENALTY
+                G.add_edge((row, col), (row + 1, col), weight=weight_to_set)
+            if col > 0:
+                if occupancy_grid[row, col - 1] == 0:
+                    weight_to_set = OPEN_SPACE_WEIGHT
+                elif occupancy_grid[row, col - 1] == 1:
+                    weight_to_set = OBSTACLE_PENALTY
+                G.add_edge((row, col), (row, col - 1), weight=weight_to_set)
+            if col < cols - 1:
+                if occupancy_grid[row, col + 1] == 0:
+                    weight_to_set = OPEN_SPACE_WEIGHT
+                elif occupancy_grid[row, col + 1] == 1:
+                    weight_to_set = OBSTACLE_PENALTY
+                G.add_edge((row, col), (row, col + 1), weight=weight_to_set)
+            # Diagonal directions
+            if row > 0 and col > 0:
+                if occupancy_grid[row - 1, col - 1] == 0:
+                    G.add_edge((row, col), (row - 1, col - 1), weight=OPEN_SPACE_WEIGHT)
+                elif occupancy_grid[row - 1, col - 1] == 1:
+                    G.add_edge((row, col), (row - 1, col - 1), weight=OBSTACLE_PENALTY)
+            if row < rows - 1 and col < cols - 1:
+                if occupancy_grid[row + 1, col + 1] == 0:
+                    G.add_edge((row, col), (row + 1, col + 1), weight=OPEN_SPACE_WEIGHT)
+                elif occupancy_grid[row + 1, col + 1] == 1:
+                    G.add_edge((row, col), (row + 1, col + 1), weight=OBSTACLE_PENALTY)
+            if row < rows - 1 and col > 0:
+                if occupancy_grid[row + 1, col - 1] == 0:
+                    G.add_edge((row, col), (row + 1, col - 1), weight=OPEN_SPACE_WEIGHT)
+                elif occupancy_grid[row + 1, col - 1] == 1:
+                    G.add_edge((row, col), (row + 1, col - 1), weight=OBSTACLE_PENALTY)
+            if row > 0 and col < cols - 1:
+                if occupancy_grid[row - 1, col + 1] == 0:
+                    G.add_edge((row, col), (row - 1, col + 1), weight=OPEN_SPACE_WEIGHT)
+                elif occupancy_grid[row - 1, col + 1] == 1:
+                    G.add_edge((row, col), (row - 1, col + 1), weight=OBSTACLE_PENALTY)
     return G
 
 
@@ -84,7 +108,7 @@ def get_path(G, start_node, goal_node):
     path = nx.astar_path(G, start_node, goal_node, mahhattan_dist)
     return path
 
-# Get only waypoints from the path instead of every point
+# Get only waypoints from the path instead of every point by removing points that are not corners
 def get_waypoints(path):
     result = []
     result.append(path[0])
