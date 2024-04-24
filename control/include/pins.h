@@ -40,3 +40,11 @@ constexpr int M3_ENA =  7;
 constexpr int M4_IN1 =  11;
 constexpr int M4_IN2 =  10;
 constexpr int M4_ENA =  12; 
+
+// BNO055 IMU Pins
+constexpr int BNO_SDA = 18;
+constexpr int BNO_SCL = 19;
+constexpr int BNO_INT = 38;
+constexpr int BNO_RST = 15;
+constexpr int BNO_PS0 = 17;
+constexpr int BNO_PS1 = 16;
