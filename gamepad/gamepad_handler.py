@@ -17,8 +17,18 @@ if __name__ == "__main__":
     while 1:
         events = get_gamepad()
         for event in events:
-            if event.ev_type == "Abs":
-                print(event.code, event.state)
+            if event.code == "ABS_X":
+                ctrl.left_joystick[0] = event.state 
+            elif event.code == "ABS_Y":
+                ctrl.left_joystick[1] = event.state 
+            elif event.code == "ABS_RX":
+                ctrl.right_joystick[0] = event.state
+            elif event.code == "ABS_RY":
+                ctrl.right_joystick[1] = event.state
+        print(ctrl)
+
+            # if event.ev_type == "Abs":
+            #     print(event.code, event.state)
 
 
 
